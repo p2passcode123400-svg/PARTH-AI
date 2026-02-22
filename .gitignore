@@ -1,0 +1,18 @@
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+
+# macOS files
+.DS_Store
+
+# Log files
+*.log
+
+# Build artifacts
+/dist/
+/build/
+
+# Vercel folder
+.vercel/
