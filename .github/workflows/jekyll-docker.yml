@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Parth AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:          #1a1b1e;
+  --sidebar:     #141517;
+  --surface:     #25262b;
+  --surface2:    #2c2d32;
+  --border:      rgba(255,255,255,0.07);
+  --text:        #c9cace;
+  --text-bright: #e8e9ed;
+  --muted:       #5c5f66;
+  --accent:      #cc785c;
+  --accent-soft: rgba(204,120,92,0.12);
+  --user-bg:     #2a2b31;
+  --ff-body:     'DM Sans', sans-serif;
+  --ff-serif:    'Crimson Pro', serif;
+  --sidebar-w:   260px;
+}
+
+html,body{height:100%;overflow:hidden}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--ff-body);
+  font-size:15px;
+  display:flex;
+}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:var(--sidebar-w);
+  background:var(--sidebar);
+  display:flex;
+  flex-direction:column;
+  border-right:1px solid var(--border);
+  flex-shrink:0;
+  height:100vh;
+}
+
+.sidebar-top{
+  padding:20px 16px 12px;
+  border-bottom:1px solid var(--border);
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:16px;
+}
+
+.brand-icon{
+  width:34px;height:34px;border-radius:10px;
+  background:linear-gradient(135deg,#cc785c,#e09a7a);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--ff-serif);font-size:17px;font-weight:600;
+  color:white;flex-shrink:0;
+  box-shadow:0 2px 12px rgba(204,120,92,0.35);
+}
+
+.brand-name{
+  font-family:var(--ff-serif);
+  font-size:19px;font-weight:600;
+  color:var(--text-bright);
+  letter-spacing:-0.01em;
+}
+
+.new-chat-btn{
+  width:100%;padding:9px 14px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;color:var(--text);
+  font-family:var(--ff-body);font-size:13px;
+  cursor:pointer;
+  display:flex;align-items:center;gap:8px;
+  transition:all 0.18s;
+  text-align:left;
+}
+.new-chat-btn:hover{background:var(--surface2);border-color:rgba(255,255,255,0.12);color:var(--text-bright)}
+.new-chat-btn svg{opacity:0.6;flex-shrink:0}
+
+.chat-history{
+  flex:1;overflow-y:auto;
+  padding:12px 10px;
+  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.08) transparent;
+}
+
+.history-label{
+  font-size:11px;color:var(--muted);
+  text-transform:uppercase;letter-spacing:0.08em;
+  padding:6px 6px 8px;
+}
+
+.history-item{
+  padding:8px 10px;border-radius:8px;
+  font-size:13px;color:var(--muted);
+  cursor:pointer;transition:all 0.15s;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  line-height:1.4;
+}
+.history-item:hover{background:var(--surface);color:var(--text)}
+.history-item.active{background:var(--surface);color:var(--text-bright)}
+
+.sidebar-footer{
+  padding:14px 16px;
+  border-top:1px solid var(--border);
+  font-size:12px;color:var(--muted);
+  line-height:1.5;
+}
+.sidebar-footer a{color:var(--accent);text-decoration:none}
+
+/* ── MAIN AREA ── */
+.main{
+  flex:1;
+  display:flex;flex-direction:column;
+  height:100vh;
+  overflow:hidden;
+}
+
+/* API setup bar */
+#setup-bar{
+  display:none;
+  background:linear-gradient(90deg,rgba(204,120,92,0.1),rgba(204,120,92,0.05));
+  border-bottom:1px solid rgba(204,120,92,0.2);
+  padding:12px 24px;
+  gap:12px;
+  flex-direction:column;
+  flex-shrink:0;
+}
+#setup-bar.show{display:flex}
+
+.setup-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+.setup-label{
+  font-size:13px;color:var(--accent);
+  font-weight:500;white-space:nowrap;
+}
+
+.setup-row input{
+  flex:1;min-width:200px;max-width:420px;
+  background:rgba(0,0,0,0.25);
+  border:1px solid rgba(204,120,92,0.25);
+  border-radius:8px;padding:7px 12px;
+  color:var(--text-bright);
+  font-family:var(--ff-body);font-size:13px;
+  outline:none;
+  transition:border-color 0.2s;
+}
+.setup-row input:focus{border-color:rgba(204,120,92,0.5)}
+.setup-row input::placeholder{color:var(--muted)}
+
+.setup-btn{
+  padding:7px 16px;border-radius:8px;
+  font-family:var(--ff-body);font-size:13px;
+  cursor:pointer;border:none;transition:all 0.18s;
+  white-space:nowrap;
+}
+.setup-btn.primary{background:var(--accent);color:white}
+.setup-btn.primary:hover{background:#d98a6e}
+.setup-btn.ghost{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.setup-btn.ghost:hover{color:var(--text);border-color:rgba(255,255,255,0.15)}
+
+.setup-hint{
+  font-size:11.5px;color:var(--muted);
+}
+.setup-hint a{color:var(--accent)}
+
+/* ── MESSAGES ── */
+#chat{
+  flex:1;overflow-y:auto;
+  padding:0;
+  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.08) transparent;
+}
+#chat::-webkit-scrollbar{width:5px}
+#chat::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:4px}
+
+/* Welcome */
+.welcome{
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  min-height:100%;
+  padding:60px 24px;
+  text-align:center;
+  animation:fade-in 0.5s ease;
+}
+
+.welcome-logo{
+  width:64px;height:64px;border-radius:18px;
+  background:linear-gradient(135deg,#cc785c,#e09a7a);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--ff-serif);font-size:32px;font-weight:600;
+  color:white;margin-bottom:24px;
+  box-shadow:0 4px 28px rgba(204,120,92,0.35);
+}
+
+.welcome h2{
+  font-family:var(--ff-serif);
+  font-size:34px;font-weight:300;
+  color:var(--text-bright);
+  letter-spacing:-0.02em;
+  margin-bottom:10px;
+}
+
+.welcome h2 em{font-style:italic;font-weight:400}
+
+.welcome p{
+  font-size:14px;color:var(--muted);
+  max-width:440px;line-height:1.7;
+  margin-bottom:36px;
+}
+
+.prompt-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  max-width:560px;width:100%;
+}
+
+.prompt-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:14px 16px;
+  cursor:pointer;
+  text-align:left;
+  transition:all 0.18s;
+}
+.prompt-card:hover{
+  background:var(--surface2);
+  border-color:rgba(204,120,92,0.25);
+  transform:translateY(-1px);
+}
+.prompt-card .icon{font-size:18px;margin-bottom:6px}
+.prompt-card .label{font-size:13px;font-weight:500;color:var(--text-bright);margin-bottom:2px}
+.prompt-card .desc{font-size:12px;color:var(--muted);line-height:1.4}
+
+/* Message rows */
+.msg-row{
+  padding:22px max(24px, calc(50% - 370px));
+  display:flex;gap:16px;
+  animation:fade-in 0.25s ease;
+  border-bottom:1px solid rgba(255,255,255,0.03);
+}
+.msg-row.user{background:var(--user-bg)}
+.msg-row.ai{background:transparent}
+.msg-row.ai:hover{background:rgba(255,255,255,0.01)}
+
+@keyframes fade-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.msg-avatar{
+  width:30px;height:30px;border-radius:8px;
+  flex-shrink:0;margin-top:1px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:600;
+  font-family:var(--ff-serif);
+}
+.msg-avatar.ai-av{
+  background:linear-gradient(135deg,#cc785c,#e09a7a);
+  color:white;
+  box-shadow:0 2px 8px rgba(204,120,92,0.3);
+}
+.msg-avatar.user-av{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  color:var(--text);
+  font-size:12px;
+}
+
+.msg-body{flex:1;min-width:0}
+
+.msg-name{
+  font-size:13px;font-weight:600;
+  color:var(--text-bright);
+  margin-bottom:7px;
+  letter-spacing:0.01em;
+}
+
+.msg-content{
+  font-size:15px;line-height:1.78;
+  color:var(--text);
+}
+
+/* Text formatting */
+.msg-content strong{color:var(--text-bright);font-weight:600}
+.msg-content em{color:#a5b4d4;font-style:italic}
+
+.msg-content code{
+  background:rgba(255,255,255,0.07);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:5px;padding:1px 7px;
+  font-family:'JetBrains Mono','Fira Code',monospace;
+  font-size:13px;color:#e2965a;
+}
+
+.msg-content pre{
+  background:rgba(0,0,0,0.35);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:10px;padding:16px;
+  margin:12px 0;overflow-x:auto;
+  position:relative;
+}
+.msg-content pre code{
+  background:none;border:none;padding:0;
+  font-size:13px;color:#94a3b8;
+  white-space:pre;
+}
+.msg-content pre .lang-tag{
+  position:absolute;top:8px;right:12px;
+  font-size:10px;color:var(--muted);
+  text-transform:uppercase;letter-spacing:0.1em;
+  font-family:var(--ff-body);
+}
+
+.msg-content p{margin-bottom:10px}
+.msg-content p:last-child{margin-bottom:0}
+.msg-content ul,.msg-content ol{margin:8px 0 10px 20px}
+.msg-content li{margin-bottom:5px;line-height:1.65}
+.msg-content h3{color:var(--text-bright);font-size:16px;margin:14px 0 6px;font-weight:600}
+.msg-content blockquote{
+  border-left:3px solid var(--accent);
+  padding-left:14px;color:var(--muted);
+  margin:10px 0;font-style:italic;
+}
+
+/* Typing dots */
+.typing{display:flex;gap:5px;align-items:center;padding:4px 0}
+.typing span{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--muted);
+  animation:tdot 1.3s ease-in-out infinite;
+}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes tdot{0%,60%,100%{transform:translateY(0);opacity:.35}30%{transform:translateY(-5px);opacity:1}}
+
+/* ── INPUT BAR ── */
+.input-bar{
+  flex-shrink:0;
+  padding:16px max(24px, calc(50% - 380px));
+  background:linear-gradient(to top, var(--bg) 60%, transparent);
+}
+
+.input-box{
+  background:var(--surface);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:16px;
+  display:flex;
+  flex-direction:column;
+  transition:border-color 0.2s, box-shadow 0.2s;
+  box-shadow:0 2px 20px rgba(0,0,0,0.3);
+}
+.input-box:focus-within{
+  border-color:rgba(204,120,92,0.35);
+  box-shadow:0 2px 20px rgba(0,0,0,0.3), 0 0 0 3px rgba(204,120,92,0.08);
+}
+
+#message{
+  background:transparent;border:none;outline:none;
+  color:var(--text-bright);
+  font-family:var(--ff-body);font-size:15px;line-height:1.6;
+  padding:14px 18px 6px;
+  resize:none;min-height:28px;max-height:200px;
+  overflow-y:auto;
+  scrollbar-width:none;
+}
+#message::-webkit-scrollbar{display:none}
+#message::placeholder{color:var(--muted)}
+
+.input-actions{
+  display:flex;align-items:center;
+  justify-content:space-between;
+  padding:8px 12px 10px;
+}
+
+.input-meta{
+  font-size:11.5px;color:var(--muted);
+  display:flex;align-items:center;gap:10px;
+}
+
+.model-tag{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 9px;border-radius:20px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid var(--border);
+  font-size:11px;color:var(--muted);
+}
+.model-dot{
+  width:5px;height:5px;border-radius:50%;
+  background:#22c55e;
+  box-shadow:0 0 6px rgba(34,197,94,0.6);
+}
+
+#send-btn{
+  width:34px;height:34px;border-radius:10px;border:none;
+  background:var(--accent);color:white;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all 0.18s;flex-shrink:0;
+  box-shadow:0 2px 10px rgba(204,120,92,0.35);
+}
+#send-btn:hover:not(:disabled){background:#d98a6e;transform:scale(1.06)}
+#send-btn:disabled{opacity:0.35;cursor:not-allowed;transform:none;box-shadow:none}
+#send-btn svg{width:15px;height:15px}
+
+/* ── MOBILE ── */
+.sidebar-toggle{
+  display:none;
+  position:fixed;top:14px;left:14px;z-index:100;
+  width:36px;height:36px;border-radius:10px;
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--text);cursor:pointer;
+  align-items:center;justify-content:center;
+}
+
+@media(max-width:720px){
+  .sidebar{
+    position:fixed;left:0;top:0;bottom:0;z-index:50;
+    transform:translateX(-100%);
+    transition:transform 0.25s ease;
+  }
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-toggle{display:flex}
+  .main{margin-left:0}
+  .prompt-grid{grid-template-columns:1fr}
+}
+
+/* Error toast */
+.toast{
+  position:fixed;bottom:100px;left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background:#ef4444;color:white;
+  padding:10px 20px;border-radius:10px;
+  font-size:13px;opacity:0;pointer-events:none;
+  transition:all 0.3s;z-index:200;
+  max-width:90vw;text-align:center;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-top">
+    <div class="brand">
+      <div class="brand-icon">P</div>
+      <div class="brand-name">Parth AI</div>
+    </div>
+    <button class="new-chat-btn" onclick="newChat()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New conversation
+    </button>
+  </div>
+  <div class="chat-history" id="history">
+    <div class="history-label">Recent</div>
+    <div class="history-item active" id="current-title">New conversation</div>
+  </div>
+  <div class="sidebar-footer">
+    Model: <strong style="color:var(--text)">Llama 3.3 70B</strong> via Groq<br>
+    Free · Fast · Private<br><br>
+    <a href="https://console.groq.com" target="_blank">Get free API key →</a>
+  </div>
+</aside>
+
+<!-- MOBILE TOGGLE -->
+<button class="sidebar-toggle" onclick="toggleSidebar()">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- API SETUP BAR -->
+  <div id="setup-bar">
+    <div class="setup-row">
+      <span class="setup-label">🔑 Enter your free Groq API key to start chatting</span>
+      <input type="password" id="api-key-input" placeholder="gsk_xxxxxxxxxxxxxxxxxxxxxxxx"/>
+      <button class="setup-btn primary" onclick="saveKey()">Save & Start</button>
+      <button class="setup-btn ghost" onclick="removeKey()">Remove</button>
+    </div>
+    <div class="setup-hint">
+      Get a free key at <a href="https://console.groq.com" target="_blank">console.groq.com</a> — no credit card needed. 
+      Key saves only in your browser, never shared.
+    </div>
+  </div>
+
+  <!-- MESSAGES -->
+  <div id="chat">
+    <div class="welcome" id="welcome">
+      <div class="welcome-logo">P</div>
+      <h2>Hello, I'm <em>Parth AI</em></h2>
+      <p>Your free AI assistant powered by Llama 3.3 70B on Groq. I can help with coding, writing, analysis, math, and much more.</p>
+      <div class="prompt-grid">
+        <div class="prompt-card" onclick="quickPrompt('Write a Python script to download YouTube videos')">
+          <div class="icon">🐍</div>
+          <div class="label">Write Python code</div>
+          <div class="desc">Scripts, automation, web scraping</div>
+        </div>
+        <div class="prompt-card" onclick="quickPrompt('Explain how black holes work in simple terms')">
+          <div class="icon">🌌</div>
+          <div class="label">Explain concepts</div>
+          <div class="desc">Science, history, any topic</div>
+        </div>
+        <div class="prompt-card" onclick="quickPrompt('Help me write a professional email to my boss asking for a raise')">
+          <div class="icon">✉️</div>
+          <div class="label">Write & edit</div>
+          <div class="desc">Emails, essays, stories, content</div>
+        </div>
+        <div class="prompt-card" onclick="quickPrompt('Give me 10 unique business ideas for 2025 with low investment')">
+          <div class="icon">💡</div>
+          <div class="label">Brainstorm ideas</div>
+          <div class="desc">Business, creative, problem-solving</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INPUT -->
+  <div class="input-bar">
+    <div class="input-box">
+      <textarea id="message" placeholder="Message Parth AI..." rows="1"
+        onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <div class="input-actions">
+        <div class="input-meta">
+          <div class="model-tag"><div class="model-dot"></div>Llama 3.3 70B · Free</div>
+          <span style="opacity:0.5">Enter to send</span>
+        </div>
+        <button id="send-btn" onclick="sendMessage()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ──
+const KEY_NAME   = 'parth_groq_key_v2';
+const GROQ_URL   = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_MODEL = 'llama-3.3-70b-versatile';
+const SYSTEM     = `You are Parth AI — a brilliant, warm, and highly capable AI assistant.
+You are helpful with everything: coding (any language), writing, math, research, creative work, analysis.
+Keep responses conversational but thorough. Use markdown formatting for code and structure.
+Be direct and give real, useful answers. Never say "As an AI" or add unnecessary disclaimers.`;
+
+let history  = [];
+let loading  = false;
+let msgCount = 0;
+
+// ── KEY MANAGEMENT ──
+const getKey  = () => localStorage.getItem(KEY_NAME) || '';
+const saveKey = () => {
+  const v = document.getElementById('api-key-input').value.trim();
+  if (!v) return toast('Please paste your API key first', 'warn');
+  if (!v.startsWith('gsk_')) return toast('Invalid key — it should start with gsk_', 'error');
+  localStorage.setItem(KEY_NAME, v);
+  document.getElementById('setup-bar').classList.remove('show');
+  toast('✅ API key saved! Start chatting.', 'ok');
+};
+const removeKey = () => {
+  localStorage.removeItem(KEY_NAME);
+  document.getElementById('api-key-input').value = '';
+  checkSetup();
+};
+const checkSetup = () => {
+  if (!getKey()) document.getElementById('setup-bar').classList.add('show');
+  else document.getElementById('setup-bar').classList.remove('show');
+};
+
+// ── TOAST ──
+function toast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = type==='error'?'#ef4444':type==='warn'?'#f59e0b':'#22c55e';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+// ── UI HELPERS ──
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 200) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function quickPrompt(text) {
+  document.getElementById('message').value = text;
+  sendMessage();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+function newChat() {
+  history = [];
+  msgCount = 0;
+  document.getElementById('chat').innerHTML = '';
+  showWelcome();
+  document.getElementById('current-title').textContent = 'New conversation';
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+function showWelcome() {
+  const chat = document.getElementById('chat');
+  chat.innerHTML = `
+  <div class="welcome" id="welcome">
+    <div class="welcome-logo">P</div>
+    <h2>Hello, I'm <em>Parth AI</em></h2>
+    <p>Your free AI assistant powered by Llama 3.3 70B on Groq. I can help with coding, writing, analysis, math, and much more.</p>
+    <div class="prompt-grid">
+      <div class="prompt-card" onclick="quickPrompt('Write a Python script to download YouTube videos')">
+        <div class="icon">🐍</div><div class="label">Write Python code</div><div class="desc">Scripts, automation, web scraping</div>
+      </div>
+      <div class="prompt-card" onclick="quickPrompt('Explain how black holes work in simple terms')">
+        <div class="icon">🌌</div><div class="label">Explain concepts</div><div class="desc">Science, history, any topic</div>
+      </div>
+      <div class="prompt-card" onclick="quickPrompt('Help me write a professional email to my boss asking for a raise')">
+        <div class="icon">✉️</div><div class="label">Write & edit</div><div class="desc">Emails, essays, stories, content</div>
+      </div>
+      <div class="prompt-card" onclick="quickPrompt('Give me 10 unique business ideas for 2025 with low investment')">
+        <div class="icon">💡</div><div class="label">Brainstorm ideas</div><div class="desc">Business, creative, problem-solving</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── FORMAT ──
+function escHtml(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function fmt(text) {
+  // Code blocks with language tag
+  text = text.replace(/```(\w*)\n?([\s\S]*?)```/g, (_,lang,code) =>
+    `<pre>${lang?`<span class="lang-tag">${lang}</span>`:''}` +
+    `<code>${escHtml(code.trim())}</code></pre>`);
+  // Inline code
+  text = text.replace(/`([^`\n]+)`/g, '<code>$1</code>');
+  // Bold / italic
+  text = text.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+  text = text.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+  // Headers
+  text = text.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+  // Blockquote
+  text = text.replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>');
+  // Unordered list
+  text = text.replace(/^\s*[-•] (.+)$/gm, '<li>$1</li>');
+  text = text.replace(/(<li>.*<\/li>\n?)+/g, s => `<ul>${s}</ul>`);
+  // Numbered list
+  text = text.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+  // Paragraphs
+  text = text.split(/\n\n+/).map(p => {
+    p = p.trim();
+    if (!p) return '';
+    if (p.startsWith('<')) return p;
+    return `<p>${p.replace(/\n/g,'<br>')}</p>`;
+  }).join('\n');
+  return text;
+}
+
+// ── ADD MESSAGE TO DOM ──
+function addMsg(role, content, isTyping=false) {
+  const welcome = document.getElementById('welcome');
+  if (welcome) welcome.remove();
+
+  const chat  = document.getElementById('chat');
+  const row   = document.createElement('div');
+  row.className = `msg-row ${role}`;
+  row.id = `msg-${++msgCount}`;
+
+  const av = document.createElement('div');
+  av.className = `msg-avatar ${role}-av`;
+  av.textContent = role==='ai' ? 'P' : 'U';
+
+  const body = document.createElement('div');
+  body.className = 'msg-body';
+
+  const name = document.createElement('div');
+  name.className = 'msg-name';
+  name.textContent = role==='ai' ? 'Parth AI' : 'You';
+
+  const content_el = document.createElement('div');
+  content_el.className = 'msg-content';
+
+  if (isTyping) {
+    content_el.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+  } else {
+    content_el.innerHTML = role==='ai' ? fmt(content) : `<p>${escHtml(content)}</p>`;
+  }
+
+  body.appendChild(name);
+  body.appendChild(content_el);
+  row.appendChild(av);
+  row.appendChild(body);
+  chat.appendChild(row);
+  chat.scrollTop = chat.scrollHeight;
+
+  return { row, content_el };
+}
+
+// ── SEND ──
+async function sendMessage() {
+  if (loading) return;
+
+  const input = document.getElementById('message');
+  const text  = input.value.trim();
+  if (!text) return;
+
+  const key = getKey();
+  if (!key) {
+    document.getElementById('setup-bar').classList.add('show');
+    document.getElementById('api-key-input').focus();
+    toast('Please enter your free Groq API key first ↑', 'warn');
+    return;
+  }
+
+  // Check if running from file:// (will block fetch)
+  if (location.protocol === 'file:') {
+    toast('❌ Cannot fetch from local file. Upload to GitHub Pages or Netlify first!', 'error');
+    return;
+  }
+
+  input.value = '';
+  input.style.height = 'auto';
+  loading = true;
+  document.getElementById('send-btn').disabled = true;
+
+  // Update sidebar title from first message
+  if (history.length === 0) {
+    document.getElementById('current-title').textContent =
+      text.length > 40 ? text.slice(0,37)+'…' : text;
+  }
+
+  addMsg('user', text);
+  history.push({ role:'user', content:text });
+
+  const { content_el } = addMsg('ai', '', true);
+
+  try {
+    const res = await fetch(GROQ_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${key}`,
+        'Content-Type':  'application/json'
+      },
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        messages: [{ role:'system', content:SYSTEM }, ...history],
+        temperature: 0.72,
+        max_tokens: 2048
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      let errMsg = data?.error?.message || `HTTP error ${res.status}`;
+      if (res.status===401)  errMsg = 'Invalid API key — please re-enter it.';
+      if (res.status===429)  errMsg = 'Rate limit hit. Wait a moment and try again.';
+      if (res.status===400)  errMsg = 'Bad request: ' + errMsg;
+      if (res.status===503)  errMsg = 'Groq servers are busy. Try again in a second.';
+      throw new Error(errMsg);
+    }
+
+    const reply = data.choices?.[0]?.message?.content;
+    if (!reply) throw new Error('Empty response from API');
+
+    history.push({ role:'assistant', content:reply });
+    content_el.innerHTML = fmt(reply);
+
+  } catch (err) {
+    const errText = err.message || 'Unknown error';
+    content_el.innerHTML = `
+      <div style="color:#f87171;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:12px 16px;font-size:14px">
+        <strong>⚠ Error:</strong> ${escHtml(errText)}
+        ${err.message?.includes('Invalid API') ? `<br><br><a href="#" onclick="removeKey();document.getElementById('setup-bar').classList.add('show');return false" style="color:#f87171">→ Update API key</a>` : ''}
+      </div>`;
+    toast('Error: ' + errText.slice(0,60), 'error');
+    history.pop(); // remove failed user message
+  }
+
+  document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
+  loading = false;
+  document.getElementById('send-btn').disabled = false;
+  input.focus();
+}
+
+// ── INIT ──
+checkSetup();
+</script>
+</body>
+</html>
